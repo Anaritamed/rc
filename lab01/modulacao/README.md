@@ -1,78 +1,44 @@
-# Laboratório: Modulação Digital com Áudio
+# Laboratório — Modulação Digital com Áudio
 
-Hoje vocês irão experimentar como os dados digitais podem ser transmitidos através de sinais de áudio. Este é um conceito em telecomunicações que está presente em modems, telefones e muitos outros sistemas de comunicação.
+**Disciplina:** Redes de Computadores — Ciência da Computação  
 
-> **Modem** (abreviação de *modulador-demodulador*) é um dispositivo eletrônico responsável por viabilizar a comunicação entre computadores e redes externas, como a internet. Sua função principal é converter sinais digitais, em sinais analógicos, adequados para transmissão por meios como linhas telefônicas, cabos coaxiais ou redes móveis — e fazer o processo inverso na recepção dos dados.
-
-![alt text](figuras/Fax_modem_antigo.jpg)
+Dados digitais, sequências de `0`s e `1`s, podem trafegar por um meio físico analógico, como o ar ou uma linha telefônica?
 
 
-📞 **Nos anos 1990 e 2000**, o modem foi um dos principais meios de acesso à internet, especialmente antes da popularização da banda larga. Naquela época, para se conectar à internet, era necessário utilizar a linha telefônica e realizar uma ligação para o provedor de acesso. 
 
-Esse processo gerava o famoso som de conexão — uma sequência de ruídos metálicos característicos — e impedia o uso simultâneo do telefone fixo. A velocidade era bastante limitada, geralmente entre 28,8 kbps e 56 kbps, o que tornava a navegação lenta e exigia paciência.
-
-<iframe width="640" height="480" src="https://www.youtube.com/embed/ofVEEWObx_I" title="Som da conexão discada (Dial-up)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
-[|YouTube](https://www.youtube.com/watch?v=ofVEEWObx_I)
+[![Assista no YouTube](https://img.youtube.com/vi/PDE9b5iU8vI/0.jpg)](https://www.youtube.com/watch?v=PDE9b5iU8vI)
 
 
-O objetivo desse laboratório é compreender como sequências de bits (0s e 1s) podem ser convertidas em sinais audíveis e depois recuperadas no receptor. Vocês irão literalmente "ouvir" os dados sendo transmitidos!
+Neste laboratório, você irá responder a essa pergunta de forma prática: construindo, do zero, um sistema capaz de **transmitir mensagens de texto por meio de sons audíveis**. A técnica empregada, denominada _Frequency-Shift Keying_ (FSK), está na base dos modems das décadas de 1980 e 1990 — e você irá literalmente **ouvi-la funcionando**.
 
 
-**TOC**:
-- [Como escutar os dados](#como-escutar-os-dados)
-- [Setup do ambiente](#setup-do-ambiente)
-- [Roteiro do Laboratório](#roteiro-do-laboratório)
-    1. [Compreendendo com a Codificação/Modulação de dados](#etapa-1-compreendendo-com-a-codificaçãomodulação-de-dados)
-    1. [Decodificação/Demodulação de Dados](#etapa-2-decodificaçãodemodulação-de-dados)
-    1. [Impacto do Ruído na Comunicação](#etapa-3-impacto-do-ruído-na-comunicação)
-    1. [Transmissão Real](#etapa-4-ruído-real)
+- [Conceitos](#conceitos)
+  - [Modulações](#modulações)
+  - [Métricas](#metricas)
+- [Estrutura das Entregas](#estrutura-das-entregas)
+  - [Entrega 1 — Relatório de Ruído](#entrega-1--relatório-de-ruído-pré-lab)
+  - [Entrega 2 — Sistema de Chat por Áudio](#entrega-2--sistema-de-chat-por-áudio-dia-do-lab)
 - [Orientações de Entrega](#orientações-de-entrega)
 
 
+## Conceitos 
 
-## Como escutar os dados
+Neste laboratório, dois tons musicais representam os estados binários:
 
-Nesse exercicio, utilizaremos diferentes tons (🔉) para representar informações binárias. Esta técnica, em comunicações digitais, é conhecida como _Frequency-Shift Keying_ (FSK).
+| Bit | Frequência | Nota Musical |
+|:---:|:----------:|:------------:|
+| `0` | 440 Hz | Lá (A4) |
+| `1` | 880 Hz | Lá (A5) |
 
-Na modulação por frequência, utilizaremos:
+A distância de uma oitava (razão 1:2) foi escolhida por maximizar a distinção entre os tons e minimizar interferência harmônica entre eles.
 
-- **Bit 0**:
-    - Representa o estado lógico baixo
-    - Representado por uma frequência base de 440 Hz
-    - Corresponde à nota musical Lá (A4)
-    - Escolhida por ser uma frequência audível e facilmente gerada
+Desse modo, para transmiir a sequência binária `10110` teriamos:
 
-
-- **Bit 1**: 
-    - Representado por 880 Hz 
-    - Representa o estado lógico alto
-    - Exatamente uma oitava acima de 440 Hz
-    - Corresponde à nota Lá (A5)
-
-Essass frequências foram escolhidas para terem uma distância harmônica com a diferença de uma oitava (1:2) facilita a distinção entre os estados e minimiza interferências entre elas.
-
-<!-- **Representação Matemática**
-   ```
-   f(0) = 440 Hz * 2^0 = 440 Hz
-   f(1) = 440 Hz * 2^1 = 880 Hz
-   ``` -->
-
-> ⚠️ Recomendado utilizar taxa de transmissão baixas para facilitar as analises
-> - 10 bits/segundo
-> - 2 bits/segundo
-> - 1 bits/segundo
-
-### Exemplo de transmissão
-
-Para a sequência binária `10110`:
 > - 1 → 880 Hz
 > - 0 → 440 Hz
 > - 1 → 880 Hz
 > - 1 → 880 Hz
 > - 0 → 440 Hz
-
-Visualização
 
 ```
 Amplitude
@@ -85,11 +51,47 @@ Amplitude
   |   880 440 880 880 440 Hz
 ```
 
+### Modulações
 
-## Setup do ambiente
+**NRZ — Non-Return-to-Zero**  
+Cada bit é representado por uma frequência constante durante todo o período de bit. É a modulação mais simples: `'1'` → 880 Hz, `'0'` → 440 Hz. Sua principal limitação está em longas sequências de bits idênticos, que dificultam a sincronização entre transmissor e receptor.
 
-<!-- Implementação dos Codificadores -->
-Requisistos : 
+**Manchester**  
+Cada bit é representado por uma *transição* de frequência no meio do período:
+- `'1'` → 880 Hz (1ª metade) → 440 Hz (2ª metade)  
+- `'0'` → 440 Hz (1ª metade) → 880 Hz (2ª metade)
+
+A transição obrigatória a cada bit garante sincronização contínua.
+
+**NRZI — Non-Return-to-Zero Inverted** *(a ser implementado)*  
+A frequência é **invertida** quando o bit transmitido é `'1'` e **mantida** quando o bit é `'0'`. Isso elimina ambiguidade em sequências longas de `'1'`s e é  utilizado em USB e HDLC.
+
+### Metricas
+
+Metricas utilizadas 
+
+#### Relação Sinal-Ruído (SNR)
+
+$$\text{SNR}_{\text{dB}} = 10 \cdot \log_{10}\!\left(\frac{P_{\text{sinal}}}{P_{\text{ruído}}}\right)$$
+
+SNR alto → canal de boa qualidade. SNR baixo ou negativo → canal degradado, com alta probabilidade de erro.
+
+#### Taxa de Erro de Bit (BER)
+
+$$\text{BER} = \frac{\text{bits incorretos}}{\text{total de bits transmitidos}}$$
+
+BER = 0 indica transmissão perfeita. BER = 0,5 equivale a um resultado aleatório — a modulação falhou completamente.
+
+
+## Estrutura das Entregas
+
+Para este laborátorio vocês tem a disposição um notebook com 
+
+Neste laboratório, você utilizaram modulação e demodulação de dados através da manipulação de frequências sonoras. 
+
+Para tal vocês tem a disposição um notebook ([lab_notebook.ipynb 🐍](./lab_notebook.ipynb)) com um código base. Leia atentemente as instruções e utilize-o para praticar.
+
+**Requisistos** : 
 
 - Computador com Windows, Linux ou macOS (não testado)
 - Python 3.x com bibliotecas:
@@ -97,6 +99,7 @@ Requisistos :
   - `scipy` 
   - `matplotlib`  
 - Interface de áudio (alto‐falante ou fone + microfone)  
+  - Não funciona no Google Coolab
 - Dispositivo externo (celular/tablet) para reprodução  
 
 1. **Instale as bibliotecas necessárias:**
@@ -108,132 +111,167 @@ Requisistos :
 2. **Teste o sistema de áudio** como as instruções do Setup do notebook.
 
 
-### Bibliotecas Necessárias
+### Entrega 1 — Relatório de Ruído *(pré-lab)*
 
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-import soundfile as sf
-import sounddevice as sd
-from scipy import signal
-import time
+> 📅 Deve ser concluída e submetida **antes** do dia do laboratório.
 
-# Configurações globais
-SAMPLE_RATE = 44100  # Taxa de amostragem
-BIT_DURATION = 1.0   # 1 segundo por bit
-FREQ_LOW = 440       # Frequência para '0' (Lá)
-FREQ_HIGH = 880      # Frequência para '1' (Lá oitava)
+#### Tarefa 1.1 — Implementação do NRZI
+
+Implemente as funções `encode_nrzi` e `decode_nrzi` no notebook. Os esqueletos com docstrings detalhadas estão fornecidos. Valide a implementação com a célula de teste incluída — todos os casos devem retornar `True`.
+
+#### Tarefa 1.2 — Análise de Robustez ao Ruído
+
+Utilizando a infraestrutura fornecida no notebook, você irá conduzir **dois conjuntos de experimentos** e comparar os resultados.
+
+**Experimento A — Configuração padrão**
+
+Execute o experimento com os parâmetros globais definidos no notebook (`BIT_DURATION = 0.5`, `FREQ_LOW = 440`, `FREQ_HIGH = 880`) e produza os gráficos e tabelas solicitados abaixo para as três modulações (NRZ, Manchester e NRZI).
+
+**Experimento B — Variação de parâmetros**
+
+Repita o experimento alterando ao menos **dois** dos parâmetros abaixo e documente os valores escolhidos:
+
+| Parâmetro | Descrição | Sugestões de variação |
+|:----------|:----------|:----------------------|
+| `BIT_DURATION` | Duração de cada bit em segundos | 0.1 s, 0.25 s, 1.0 s, 2.0 s |
+| `FREQ_LOW` / `FREQ_HIGH` | Frequências que representam '0' e '1' | Aproximar (ex: 440/550 Hz) ou afastar (ex: 300/1200 Hz) |
+| `SAMPLE_RATE` | Taxa de amostragem | 22050 Hz, 8000 Hz |
+
+Produza os mesmos gráficos e tabelas do Experimento A para cada configuração testada no Experimento B.
+
+
+**Q1.1 — Curva SNR × BER**
+
+Para cada experimento, gere um gráfico com o SNR no eixo x e a BER no eixo y. As três modulações (NRZ, Manchester e NRZI) devem aparecer no mesmo gráfico, cada uma com uma cor distinta e identificada na legenda. 
+
+O objetivo é visualizar em que momento cada modulação começa a degradar e com que velocidade a taxa de erro cresce à medida que o canal piora. Abaixo do gráfico, inclua uma tabela resumindo os valores de SNR nos dois pontos críticos descritos em Q1.2.
+
+> Nem sempre vocês verão o erro inicialmene, aumentem o tamanho da menssagem para aumentarem a chance de erro.
+
+**Q1.2 — Pontos de degradação**
+
+Com base no gráfico gerado em Q1.1, identifique para cada modulação os dois limiares de desempenho abaixo. O objetivo é entender a faixa operacional de cada esquema de codificação — isto é, em que condições de canal cada modulação ainda é utilizável e a partir de quando a comunicação se torna inviável.
+
+| Modulação | SNR de primeiro erro — BER > 0 (dB) | SNR de falha total — BER ≥ 0,5 (dB) |
+|:---------:|:-----------------------------------:|:------------------------------------:|
+| NRZ | | |
+| Manchester | | |
+| NRZI | | |
+
+O **SNR de primeiro erro** marca o ponto em que o canal começa a introduzir erros — a comunicação ainda é possível, mas já não é mais perfeita. O **SNR de falha total** marca o ponto em que a decodificação passa a ser equivalente a um chute aleatório, tornando a comunicação completamente inviável. A diferença entre esses dois valores indica a **margem de degradação** de cada modulação: uma margem larga significa que a modulação se deteriora gradualmente; uma margem estreita indica colapso abrupto.
+
+Preencha a tabela para o Experimento A e repita para cada configuração testada no Experimento B.
+
+**Q1.3 — Análise comparativa** *(mínimo 15 linhas)*
+
+Com base nos gráficos e tabelas de Q1.1 e Q1.2, redija uma análise comparando o comportamento das três modulações. Discuta: qual modulação apresentou maior robustez ao ruído e por quê? Como a variação de `BIT_DURATION` afetou os resultados — taxas mais lentas tornam o sistema mais robusto? O afastamento ou aproximação das frequências (`FREQ_LOW`/`FREQ_HIGH`) impacta a capacidade de decodificação? Os resultados obtidos confirmam o comportamento esperado pela teoria vista em sala? Relacione ao menos um dos resultados com uma situação real de transmissão (modem, rádio, USB etc.).
+
+> ⚠️ **A escrita do relatório deve ser de autoria própria do grupo. O uso de LLMs ou ferramentas de geração de texto para redigir as análises é vedado e poderá resultar em anulação da entrega.**
+
+**Formato de entrega:** PDF do notebook exportado (Arquivo → Salvar e Exportar como PDF) + link para o repositório do grupo no Google Classroom.
+
+> ⚠️ **Lembre-se que a organização é importante, desse modo verifiquem se eu conseguirei ler e entender o que foi escrito**
+
+
+### Entrega 2 — Sistema de Chat por Áudio *(dia do lab)*
+
+> 📅 O sistema deve estar funcional no dia do laboratório.
+
+**Grupos de até 3 integrantes (os mesmos da Entrega 1).**
+**Não há necessidade de interface, vocês podem utilizar um notebook**
+
+O sistema a ser construído é um chat de camada física — isto é, a unidade de informação transmitida e recebida é o bit: `0` ou `1`. Não há codificação de caracteres, framing, detecção de erros ou qualquer protocolo de camadas superiores. A responsabilidade do sistema termina na entrega dos bits ao receptor, exatamente como ocorre na camada 1 do modelo OSI.
+
+Isso significa que o grupo transmissor envia uma sequência de bits e o grupo receptor exibe a sequência de bits recebida — a interpretação do conteúdo é humana, não do sistema. A seguir temos um exemplo de menssagem transmitida:
+
+```
+00101010101111010101
 ```
 
+Ou seja, voçês receberam um *string* com 0 e 1 transmitirão e decodificarão as menssagens durante a apresentação.
 
-<!-- 
-## Parte 3: Roteiro do Laboratório
+#### O que construir
 
-Execute as etapas observando os codigos para
+Um sistema de terminal/notebook que permita:
 
-**Etapa 1:** Explore esta etapa para se familiarizar com a codificação/modulação de dados
+1. **Transmitir** uma mensagem de texto digitada, convertendo-a em sinal de áudio via FSK  
+    - Transmitir sinal de áudio - via alto falante.
+    - Salvar arquivos .wav com sinais a serem transmitidos
+2. **Receber** um sinal de áudio capturado pelo microfone e exibir a mensagem decodificada  
+3. Selecionar a modulação em tempo de execução: **NRZ**, **NRZI** ou **Manchester**
+4. Selecionar parametros basicos (via variavel de ambiente, ou arquivo de configuração)
+    - `BIT_DURATION`
+    - `FREQ_LOW` / `FREQ_HIGH`
+    - `SAMPLE_RATE`
 
-**Etapa 2:** Decodificação/Demodulação de dados
+Não é exigida interface gráfica. Saídas via `print` são suficientes.
 
-**Etapa 3:** Execute `exercicio_ruido()` para ver o efeito do ruído
+> ⚠️ Atenção: os parâmetros do canal serão variados pelo professor ao longo do laboratório. 
 
-**Etapa 4:** Execute `exercicio_microfone()` para a experiência completa 
--->
+#### Critérios de Avaliação
 
-## Roteiro do Laboratório
-
-Neste laboratório, você irá explorar o processo de modulação e demodulação de dados através da manipulação de frequências sonoras. Abaixo, está o roteiro detalhado para conduzir sua experiência.
-
-Leia atentemente as instruções e utilize o [lab_notebook.ipynv 🐍](./lab_notebook.ipynb) para praticar.
-
-### **Etapa 1**: Compreendendo com a Codificação/Modulação de dados
-
-Nesta primeira etapa, vocês irão explorar como uma sequência de bits pode ser transformada em um sinal de áudio audível. Este processo é conhecido como modulação digital.
-
-**O que vocês irão fazer:**
-
-1. **Execute o primeiro código disponível** e observe o que acontece
-2. **Escutem com atenção** os sons produzidos - cada tom representa um bit diferente
-3. **Identifiquem os padrões**: Notem como bits diferentes produzem frequências diferentes
-4. **Experimentem com diferentes sequências** de bits modificando os dados de entrada
-
-📖  **Questões para reflexão** 
-- Quantos tons diferentes vocês conseguem distinguir?
-- É possível identificar qual tom representa 0 e qual representa 1?
-- O que acontece quando há muitos bits iguais consecutivos?
-
-### **Etapa 2**: Decodificação/Demodulação de Dados
-
-Agora vocês irão trabalhar no processo inverso: como recuperar os dados originais a partir do sinal de áudio recebido. Este é o papel do receptor em um sistema de comunicação.
-
-**O que vocês irão fazer**:
-1. **Execute o segundo código** que implementa o processo de decodificação
-2. **Observem como o sinal** é analisado para identificar as frequências presentes
-3. **Comparem os dados** originais com os dados recuperados
-4. **Testem com diferentes mensagens** para verificar a eficácia do sistema
-
-🔎❓ **Perguntas para investigar** 
-- **Q2.1** : Que fatores podem afetar a qualidade da decodificação?
-- **Q2.2** : O que acontece se a taxa de transmissão for muito alta?
-- **Q2.3** : Como o sistema decide se a frequências representa '0' ou '1'? (observe os codigos)
-
-🔓🔎 **Análise de modulação**
-- Busquem pelo o arquivo de audio com a sua mátricula no diretorio [dados_codificados](./dados_codificados/) e respondas as seguintes questões:
-    - **A2.1** : Qual a modulação foi utilizada?
-    - **A2.2** : Qual o número de bits na menssagem
-    - **A2.3** : Qual a menssagem enviada? 
-
-> Vocês tem até 3 dias apos o labotario ser explicado para verificar se a sua menssagem esta codificada corretamente!
-
-### **Etapa 3**: Impacto do Ruído na Comunicação
-
-Nesta etapa, vocês irão experimentar um dos maiores desafios em comunicações reais: o ruído. Todo sistema de comunicação está sujeito a interferências que podem corromper os dados.
-
-**O que vocês irão fazer**: Utilizando a menssagem recebida na etapa anterior.
-1. **Adicionem ruido ao sinal** por meio da função específica
-2. **Escutem e visualize a diferença** entre o sinal limpo e o sinal com ruído
-3. **Observem como o ruído afeta** a capacidade de recuperar os dados corretamente
-
-
-📖  **Questões para reflexão** 
-- Existem padrões de bits mais resistentes ao ruído que outros?
-- As taxas de bits por segundo modificam a resistencia a ruídos
-- Como isso se relaciona com situações reais (telefone com interferência, rádio com estática)?
-
-🔎❓**Análise crítica**:
-- **A3.1** : Utilizando a sua menssagem da Etapa 2. A partir de que nível de ruído, para cada modulação, o sistema começa a falhar? 
-    - a) Identifique o valor de SNR onde os primeiros bits são comprometidos
-    - b) Identifique o valor de SNR onde os primeiros todos os bits são comprometidos
-    - Utilize graficos para ilustrar os resultados onde o eixo x representa o valor de SNR e o y o número de erros
-
-> Responda o item A3.1 como um relátorio utilize os graficos para explicar os seus achados
-
-### **Etapa 4**: Ruído Real
-
-Esta é a experiência mais realística do laboratório! Vocês irão simular um sistema completo de comunicação usando o microfone e alto-falantes do computador, criando um canal de comunicação real através do ar.
-
-
-O que vocês irão fazer:
-1. **Execute a função final** que utiliza o microfone para capturar sinais
-2. **Configurem o ambiente**: Posicionem adequadamente microfone e alto-falantes
-3. **Testem a transmissão** de mensagens reais através do ar
-4. **Experimentem diferentes condições**: ruído ambiente
-
-🔓 **Perguntas para investigar** 
-- **Q4.1** : Qual foi a menssagem enviada enviada no arquivo `dados_ar.wav`?
-- **Q4.2** : Quantas reproduções (vezes) foram necessarias para decodificar a menssagem completa?
-
+A avaliação é realizada ao vivo: o professor fornece uma mensagem secreta e seleciona a modulação no momento da apresentação. O grupo deve transmiti-la e receber menssagens com sucesso, bem como responder a questionamentos.
 
 
 ## Orientações de Entrega
 
-Para entregar as atividades do laboratório "Modulação Digital com Áudio", siga estas orientações:
+| Entrega | O que entregar | Onde | Prazo |
+|:--------|:---------------|:-----|:------|
+| **Entrega 1** | PDF do notebook + link do repositório | Google Classroom | Antes do lab |
+| **Entrega 2** | Sistema funcional apresentado ao vivo | Laboratório | Dia do lab |
 
-* **Respostas no Google Classroom:** As respostas para as questões devem ser inseridas diretamente no formulário disponível no Google Classroom.
 
-* **Análise A3.1 (PDF e Repositório):** Para a análise **A3.1**, você deve anexar o **PDF do relatorio** com os resultados e gráficos. Além disso, inclua o **link para o repositório** contendo o código-fonte. Ambos devem ser enviados no formulário do Google Classroom.
-<!-- 
-* **Análise A3.1 (PDF e Repositório):** Para a análise **A3.1**, você deve anexar o **PDF do notebook** com os resultados e gráficos. Além disso, inclua o **link para o repositório** contendo o código-fonte. Ambos devem ser enviados no formulário do Google Classroom. -->
+A entrega 1 poderá ser entregue como um **Jupyter Notebook** (`.ipynb`). Cada atividade combina células de código Python com células de texto em **Markdown**, onde você vai escrever suas respostas, análises e justificativas.
 
-Certifique-se de que todas as questões foram respondidas e que os arquivos e links estão corretos antes de finalizar a entrega.
+**Siga as instruções abaixo rigorosamente:**
 
+1. **Células de código:** implemente o que é pedido, execute a célula e certifique-se de que a saída (gráficos, tabelas, valores) está visível no notebook antes de entregar.
+
+2. **Células de resposta em Markdown:** para cada questão de reflexão ou análise, insira uma nova célula do tipo *Markdown* logo abaixo da célula de código correspondente.  
+   Para criar uma célula Markdown no Jupyter, clique no menu suspenso que aparece como *“Code”* na barra de ferramentas e selecione *“Markdown”*.  
+   Escreva sua resposta em texto corrido, com argumentação clara. Não é suficiente apenas mostrar números — explique o raciocínio.
+
+3. **Equações no Markdown:** quando precisar escrever fórmulas matemáticas nas suas respostas, use notação LaTeX.  
+   Use:
+
+   - `$...$` para fórmulas *inline*  
+   - `$$...$$` para fórmulas em bloco
+
+   O Jupyter renderiza essas fórmulas automaticamente quando a célula é Markdown.
+
+   Caso precise de referência, consulte o [markdownguide.org](https://www.markdownguide.org/extended-syntax/#latex)
+
+   **Exemplo inline:**  
+   Escreva:  
+   ```
+   A taxa de falsos positivos é $p = 0{,}01$
+   ```
+
+   **Exemplo em bloco:**
+   ```md
+   $$
+   k = \frac{m}{n} \ln 2
+   $$
+   ```
+
+4. **Exportação para PDF:** ao finalizar, exporte o notebook pelo menu:
+
+   ```
+   File → Save and Export Notebook As → PDF
+   ```
+
+   Abra o arquivo gerado e **verifique se todas as células, gráficos e equações estão legíveis** antes de submeter.
+
+   Caso o seu ambiente não suporte exportação direta, utilize:
+
+   ```
+   File → Print → Salvar como PDF
+   ```
+
+#### ⚠️ Atenção
+
+Entregas com células não executadas, gráficos ausentes, equações não renderizadas ou PDF ilegível **não serão aceitas**. Execute o notebook antes de exportar, com:
+
+```
+Kernel → Restart & Run All
+```

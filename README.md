@@ -1,4 +1,4 @@
-# 🖥️ Redes de Computadores - Ciência da Computação UFCG 2025.2
+# 🖥️ Redes de Computadores - Ciência da Computação UFCG
 
 Este repositório será utilizado para as atividades práticas da disciplina de Redes de Computadores do curso de Ciência da Computação da Universidade Federal de Campina Grande (UFCG).
 
@@ -9,7 +9,7 @@ Abaixo, você encontrará uma tabela com todas as atividades práticas do semest
 
 | Unidade | Atividade | Tópicos Abordados | Status | Link para a Atividade |
 | :----- | :-------- | :---------------- | :----- | :-------------------- |
-| 1 | Laboratório 1: Modulação Digital com Áudio & Análise de erros de comunicação | Conversão de bits em sinais de áudio (FSK), codificação, decodificação, impacto do ruído. | 🔥 ATUAL | [Acessar Atividade](./lab01/README.md) |
+| 1 | Laboratório 1: Modulação Digital com Áudio & Análise de erros de comunicação | Conversão de bits em sinais de áudio (FSK), codificação, decodificação, impacto do ruído. | 🔥 ATUAL | [Acessar Atividade](./lab01/modulacao/README.md) |
 <!-- | 1 | Laboratório 2:  Implementação e Análise de erros de comunicação com CRC. | ✅ Concluído | [Acessar Atividade](./deteccao_de_erro//README.md) |
 | 2 | **Laboratório 3**: Roteamento Dinâmico. Implementação do vetor de distancia. | 🔥 ATUAL | **[Acessar Atividade](./roteamento/README.md)** | -->
 <!-- | 1      | Laboratório 2: Análise de Protocolos com Wireshark | Captura e análise de pacotes, funcionamento de protocolos em diferentes camadas. | ⏳ Em Andamento | - |
